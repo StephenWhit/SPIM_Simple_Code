@@ -1,0 +1,123 @@
+#Stephen Whitcomb Computer Architecture Home Work 5 Problem 2
+
+	.data
+
+prompt:	
+	.asciiz "Enter the string you want to manipulate: "
+prompt2:
+	.asciiz "Enter the char in the string you would like to substitute: "
+prompt3:
+	.asciiz "Enter the substitute char: "
+message1:
+	.asciiz	"Original string: "
+message2:
+	.asciiz "Substitute: "
+arrow:
+	.asciiz " -> "
+message3:
+	.asciiz "Result string: "
+inputS:
+	.space 64			#allocate 64 bytes for string
+inputSN:
+	.space 64			#allocate 64 bytes for string
+inputCTR:
+	.word 1				#allocate 1 bytes for char to replace
+inputCTS:
+	.word 1				#allocate 1 bytes for char to substitute 
+
+#---------------------------------------------------------
+	.globl main
+	.text
+main:
+	la $a0, prompt		#printing out prompt
+	li $v0, 4
+	syscall
+
+	la $a0, inputS 		#sets $a0 to point to the space allocated for inputS
+	li $a1, 64 			#allot the byte space for string
+	li $v0, 8 			#load op code for getting a string from the user into register $v0
+	syscall 			#reads register $v0 for op code, places string in reference to $a0
+
+	la $a0, prompt2		#printing out prompt2
+	li $v0, 4
+	syscall
+
+	la $a0, inputCTR	#sets $a0 to point to the space allocated for inputCTR
+	li $a1, 4			#allot byte space for char, let's hope they don't type more
+	li $v0, 8			#load op code for getting user input
+	syscall				#takes in user input
+
+	la $a0, prompt3		#printing out prompt3
+	li $v0, 4
+	syscall
+
+	la $a0, inputCTS	#sets $a0 to point to the space allocated for inputCTS
+	li $a1, 4			#allot byte space for char, let's hope they don't type more
+	li $v0, 8			#load op code for getting user input
+	syscall				#takes in user input
+
+	la $t0, inputS		#loading string into temporary address
+	la $t1, inputCTR	#loading char to replace into temp address
+	la $t2, inputCTS	#loading char to sub into temp address
+	li $t3, 0			#setting the char count
+	la $t6, inputSN		#setting new string into temp
+
+# while loop -----------------
+loop:
+	lb $t4, 0($t1)		#get first byte of chartoreplace input
+	lb $t5, 0($t0)		#set $t5 to the first byte of string address
+	beqz $t5, exit		#exit if the byte = 0 
+	beq $t5, $t4, replace	#if the char and current byte match, replace
+
+	lb $t5, 0($t0)		#get first byte of charToSub input
+	sb $t5, 0($t6)		#set original string to new string
+
+	addi $t6, $t6, 1 	#increment the new string's byte address
+	addi $t0, $t0, 1 	#increment the byte address
+	jal loop
+ 
+replace:
+	lb $t5, 0($t2)		#get first byte of charToSub input
+	sb $t5, 0($t6)		#set t6 to t5
+	addi $t0, $t0, 1 	#increment the string's byte address
+	addi $t6, $t6, 1 	#increment the new string's byte address
+	jal loop
+
+# end loop ------------------
+exit:
+	la $a0, message1	#print first message
+	li $v0, 4
+	syscall
+
+	la $a0, inputS		#print orignial string
+	li $v0, 4
+	syscall
+
+	la $a0, message2	#print second message
+	li $v0, 4
+	syscall
+
+	sb $zero, 1($t1)	#removing the newline char from the end
+
+	move $a0, $t1 		#print CharToReplace
+	li $v0, 4			
+	syscall 	
+
+	la $a0, arrow		#print arrow 
+	li $v0, 4
+	syscall
+
+	la $a0, inputCTS 	#print CharToSub
+	li $v0, 4			
+	syscall
+
+	la $a0, message3	#print third message
+	li $v0, 4
+	syscall
+
+	la $a0, inputSN		#print result string
+	li $v0, 4
+	syscall
+
+	li $v0, 10			#exit
+	syscall

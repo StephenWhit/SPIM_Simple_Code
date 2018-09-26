@@ -1,0 +1,107 @@
+#Stephen Whitcomb Computer Architecture Home Work 5 Problem 1
+
+	.data
+
+prompt:	
+	.asciiz "Enter the string you want to check: "
+prompt2:
+	.asciiz "Enter the char you would like to count: "
+message1:
+	.asciiz	"Character "
+message2:
+	.asciiz " occurs in string "
+message3:
+	.asciiz " times"
+space:
+	.asciiz " "
+inputS:
+	.space 64			#allocate 64 bytes for string
+inputC:
+	.word 1				#allocate 1 bytes for char
+	
+	.globl main
+	.text
+main:
+	la $a0, prompt		#printing out prompt
+	li $v0, 4
+	syscall
+
+	la $a0, inputS 		#sets $a0 to point to the space allocated for inputS
+	li $a1, 64 			#allot the byte space for string
+	li $v0, 8 			#load op code for getting a string from the user into register $v0
+	syscall 			#reads register $v0 for op code, places string in reference to $a0
+
+	la $a0, prompt2		#printing out prompt2
+	li $v0, 4
+	syscall
+
+	la $a0, inputC		#sets $a0 to point to the space allocated for inputC
+	li $v0, 8			#load op code for getting user input
+	syscall				#takes in user input
+
+	la $t0, inputS		#loading string into temporary address
+	la $t1, inputC		#loading char into temp address
+	li $t3, 0			#setting the char count
+	li $t6, 0	
+
+# while loop -----------------
+loop:
+	addi $t6, $t6, 1
+	lb $t4, 0($t1)		#get first byte of char input
+	lb $t5, 0($t0)		#set $t5 to the first byte pointed to by the address
+	beqz $t5, exit		#exit if the byte = 0 
+	beq $t5, $t4, count	#if the char and current byte match, count
+
+	addi $t0, $t0, 1 	#increment the byte address
+	jal loop
+ 
+count:
+	addi $t3, $t3, 1    #else increment the counter
+	addi $t0, $t0, 1 	#increment the byte address
+	jal loop			#go back to loop
+
+# end loop ------------------
+exit:
+	la $a0, message1	#print first message
+	li $v0, 4
+	syscall
+
+	sb $zero, 1($t1)	#removing the newline char from the end
+
+	move $a0, $t1 		#print char
+	#la $a0, inputC		#print char
+	li $v0, 4
+	syscall
+
+	la $a0, message2	#print second message
+	li $v0, 4
+	syscall
+	
+	li $s0,0            # Set index to 0
+remove:
+    lb $a3, inputS($s0)	# Load first char of string
+    addi $s0, $s0, 1	# Increment
+    bnez $a3, remove	# Loop to end of string
+    beq $a1, $s0, skip	# detect \n
+    addiu $s0, $s0, -2	# get index before the one we're at (\n)
+    sb $0, inputS($s0)	# write 0 into byte
+
+skip:
+	la $a0, inputS
+	li $v0, 4			
+	syscall 	
+
+	la $a0, space
+	li $v0, 4			
+	syscall
+
+	move $a0, $t3		#print number
+	li $v0, 1
+	syscall
+
+	la $a0, message3	#print third message
+	li $v0, 4
+	syscall
+
+	li $v0, 10			#exit
+	syscall

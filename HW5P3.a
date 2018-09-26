@@ -1,0 +1,116 @@
+#Stephen Whitcomb Computer Architecture Home Work 5 Problem 3
+
+	.data
+
+prompt:	
+	.asciiz "Enter the number of integers you want to compute: "
+prompt2:
+	.asciiz "Enter integer number "
+colon:
+	.asciiz ": "
+message1:
+	.asciiz	"The sum of the "
+message2:
+	.asciiz " integers is "
+MaxMessage:
+	.asciiz "\nThe maximum value is "
+MinMessage:
+	.asciiz "\nThe minimum value is "
+	
+	.globl main
+	.text
+main:
+	la $a0, prompt		#printing out prompt
+	li $v0, 4
+	syscall
+
+	li $v0, 5			#taking in the n input and setting it to t0
+	syscall
+	move $t0, $v0
+
+	li $t1, 1			#setting counter to 1
+	li $t2, 0			#setting Max to 0
+	li $t3, 1000000000	#setting Min to 0
+	li $t5, 0			#setting sum to 0
+
+#while loop -------------------------------------
+loop:
+	slt $t6, $t0, $t1
+	beq $t6, 1, exit	#if t1 > t0 (counter is greater than n ), exit
+
+	la $a0, prompt2		#printing out prompt2
+	li $v0, 4
+	syscall
+
+	move $a0, $t1		#print the count we are on
+	li $v0, 1
+	syscall
+
+	la $a0, colon		#print colon
+	li $v0, 4
+	syscall
+
+	li $v0, 5			#taking in the integer input and setting to t4
+	syscall
+	move $t4, $v0
+
+	addi $t1, $t1, 1 	#increment the counter
+	
+	add $t5, $t5, $t4	#adding input to sum
+
+	beq $t1, 2, setBoth	#if it is the first number, set both min and max
+
+	slt $t6, $t2, $t4	#if $t4 (current) is greater than $t2 (max)
+	beq $t6, 1, setMax	#set max to current 
+
+	slt $t6, $t3, $t4	#if $t4 (current) is less than $t3 (min)
+	beq $t6, $zero, setMin	#set min to current
+
+	jal loop
+
+setBoth:
+	move $t2, $t4
+	move $t3, $t4
+	j loop
+setMax:
+	move $t2, $t4 
+	j loop
+setMin:
+	move $t3, $t4
+	j loop
+# end loop ------------------
+exit:
+	la $a0, message1	#print first message
+	li $v0, 4
+	syscall
+
+	move $a0, $t0		#print n
+	li $v0, 1
+	syscall
+
+	la $a0, message2	#print second message
+	li $v0, 4
+	syscall
+
+	move $a0, $t5		#print sum
+	li $v0, 1
+	syscall 	
+
+	la $a0, MaxMessage	#print max message
+	li $v0, 4
+	syscall
+
+	move $a0, $t2		#print max
+	li $v0, 1
+	syscall
+
+	la $a0, MinMessage	#print min message
+	li $v0, 4
+	syscall
+
+	move $a0, $t3		#print min
+	li $v0, 1
+	syscall
+
+	li $v0, 10			#exit
+	syscall

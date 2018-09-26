@@ -1,0 +1,16 @@
+Stephen Whitcomb
+Assignment 5 csci 4720
+
+	CODED USING LATEST VERSION OF WINDOWS SPIM
+HW5P1 
+	-contains the spim code for problem 1 of assignment 5
+	-takes in a string and a char, counts the number of times the char occurs in the string
+HW5P2
+	-contains the SPIM code for problem 2 of assignment5
+	-takes in a string, a char to sunstitute and a char to replace the aforementioned one
+	-returns original string, both chars, and the altered string
+HW5P3
+	-contains the SPIM code for problem 3of assignment5
+	-takes in the number of integer arguments (n) and prompts for each argument
+	-takes in n integers and ouputs sum, max, and min
+		
